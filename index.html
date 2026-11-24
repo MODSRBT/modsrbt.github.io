@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mods RBT</title>
+<meta name="description" content="Mods e ferramentas RBT para Farming Simulator 25: GPS, Tablet e mais.">
+<meta name="theme-color" content="#1b1f17">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231b1f17'/%3E%3Ctext x='32' y='45' font-family='Arial Black,Arial' font-weight='900' font-size='38' text-anchor='middle' fill='%23b8e05a'%3ER%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f3f4ee; --card:#ffffff; --ink:#1b1f17; --ink2:#4d5446; --line:#dfe3d6;
+  --olive:#344b00; --olive2:#4a6a08; --lime:#b8e05a; --lime-ink:#1d2a00;
+  --dark:#1b1f17; --dark2:#262c20; --on-dark:#e9eee0; --on-dark2:#a9b39c;
+  --warn:#b26b00; --warn-bg:#fff4df; --ok:#2f6b12; --ok-bg:#e8f5dc; --bad:#a22a2a; --bad-bg:#fbe7e7;
+  --r:18px; --shadow:0 1px 2px rgba(20,30,10,.06),0 8px 24px rgba(20,30,10,.06);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#12150f; --card:#1b1f17; --ink:#e9eee0; --ink2:#a9b39c; --line:#2d3426;
+  --dark:#0d0f0b; --dark2:#1b1f17; --warn-bg:#33270f; --ok-bg:#1d2e13; --bad-bg:#371818; --warn:#f0b450; --ok:#9fd66b; --bad:#f08a8a;
+  --shadow:0 1px 2px rgba(0,0,0,.3);
+}}
+:root[data-theme="dark"]{
+  --bg:#12150f; --card:#1b1f17; --ink:#e9eee0; --ink2:#a9b39c; --line:#2d3426;
+  --dark:#0d0f0b; --dark2:#1b1f17; --warn-bg:#33270f; --ok-bg:#1d2e13; --bad-bg:#371818; --warn:#f0b450; --ok:#9fd66b; --bad:#f08a8a;
+  --shadow:0 1px 2px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,Segoe UI,Arial,sans-serif;overflow-x:hidden}
+h1,h2,h3{font-family:Archivo,Inter,sans-serif;line-height:1.1;margin:0}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+.hide{display:none!important}
+
+/* topo */
+header{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top{display:flex;align-items:center;gap:14px;height:64px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;margin-right:auto}
+.logo i{width:38px;height:38px;border-radius:11px;background:var(--dark);color:var(--lime);display:grid;place-items:center;font:900 22px Archivo,sans-serif;font-style:italic;box-shadow:inset 0 0 0 1px var(--line)}
+.logo b{font:800 17px Archivo,sans-serif;letter-spacing:.02em}
+.logo small{display:block;font-size:10px;letter-spacing:.16em;color:var(--ink2);margin-top:-2px}
+nav.links a{text-decoration:none;font-weight:600;font-size:14px;padding:8px 10px;border-radius:10px;color:var(--ink2)}
+nav.links a:hover{color:var(--ink);background:var(--card)}
+@media (max-width:700px){nav.links{display:none}}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;padding:11px 18px;font-weight:700;font-size:15px;cursor:pointer;text-decoration:none;white-space:nowrap;transition:transform .08s,filter .15s}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.55;cursor:default}
+.btn-lime{background:var(--lime);color:var(--lime-ink)}
+.btn-lime:hover{filter:brightness(1.05)}
+.btn-dark{background:var(--dark);color:var(--on-dark)}
+.btn-ghost{background:var(--card);border:1px solid var(--line);color:var(--ink)}
+.btn-sm{padding:7px 12px;font-size:13px;border-radius:10px}
+.btn-bad{background:var(--bad-bg);color:var(--bad)}
+.gicon{width:18px;height:18px;flex:none}
+.me{display:flex;align-items:center;gap:8px}
+.me img,.me .av{width:34px;height:34px;border-radius:50%;object-fit:cover;background:var(--olive);color:#fff;display:grid;place-items:center;font-weight:700}
+.me .who{font-size:13px;line-height:1.2;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:520px){.me .who{display:none}}
+
+/* demo */
+.demo{background:#fff4df;color:#5a3d00;font-size:13px;border-bottom:1px solid #f0d9a8}
+.demo .wrap{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;padding-top:8px;padding-bottom:8px}
+.demo select{padding:4px 8px;border-radius:8px;border:1px solid #e0c48a;background:#fff;color:#5a3d00}
+
+/* hero */
+.hero{margin:22px 0 8px;background:var(--dark);color:var(--on-dark);border-radius:26px;overflow:hidden;position:relative;display:grid;grid-template-columns:1.1fr .9fr}
+.hero:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,transparent 0 46px,rgba(184,224,90,.045) 46px 92px);pointer-events:none}
+.hero .txt{padding:44px 40px;position:relative}
+.kicker{font:700 12px Inter,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--lime)}
+.hero h1{font-size:clamp(34px,5.2vw,54px);font-weight:900;margin:12px 0 14px;letter-spacing:-.01em}
+.hero p{color:var(--on-dark2);max-width:470px;margin:0 0 22px;font-size:17px}
+.hero .acts{display:flex;flex-wrap:wrap;gap:10px}
+.hero .btn-ghost{background:transparent;color:var(--on-dark);border-color:#3a4330}
+.art{position:relative;display:grid;place-items:center;padding:30px}
+.tab{width:min(360px,100%);aspect-ratio:4/3;background:#10130d;border-radius:22px;padding:12px;box-shadow:0 20px 50px rgba(0,0,0,.45),inset 0 0 0 2px #2c3324;transform:rotate(-4deg)}
+.tab svg{width:100%;height:100%;display:block;border-radius:12px}
+@media (max-width:820px){.hero{grid-template-columns:1fr}.hero .txt{padding:32px 22px 8px}.art{padding:8px 22px 30px}}
+
+/* passos de acesso */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0 0}
+.step{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;display:flex;gap:12px;align-items:flex-start}
+.step .n{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:var(--bg);color:var(--ink2);border:1px solid var(--line)}
+.step.done .n{background:var(--olive);color:#fff;border-color:var(--olive)}
+.step.now{border-color:var(--olive2);box-shadow:0 0 0 3px color-mix(in srgb,var(--lime) 40%,transparent)}
+.step.now .n{background:var(--lime);color:var(--lime-ink);border-color:var(--lime)}
+.step b{display:block;font-size:15px}
+.step span{font-size:13px;color:var(--ink2)}
+@media (max-width:760px){.steps{grid-template-columns:1fr}}
+
+/* aviso de status */
+.status{margin:14px 0 0;border-radius:var(--r);padding:16px 18px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;border:1px solid var(--line);background:var(--card)}
+.status.warn{background:var(--warn-bg);border-color:transparent}
+.status.ok{background:var(--ok-bg);border-color:transparent}
+.status.bad{background:var(--bad-bg);border-color:transparent}
+.status p{margin:0;max-width:640px}
+.status input{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);min-width:0;width:220px;max-width:100%}
+.status form{display:flex;flex-wrap:wrap;gap:8px}
+
+section{padding:46px 0 6px;scroll-margin-top:60px}
+.sh{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:18px}
+.sh h2{font-size:clamp(26px,3.4vw,34px);font-weight:800;margin-top:6px}
+.sh .kicker{color:var(--olive2)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .sh .kicker{color:var(--lime)}}
+:root[data-theme="dark"] .sh .kicker{color:var(--lime)}
+.muted{color:var(--ink2);font-size:14px}
+
+/* filtros */
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:7px 14px;font-size:14px;font-weight:600;cursor:pointer;color:var(--ink2)}
+.chip[aria-pressed="true"]{background:var(--dark);color:var(--on-dark);border-color:var(--dark)}
+.search{margin-left:auto;position:relative;flex:1 1 220px;max-width:320px}
+.search input{width:100%;padding:9px 12px 9px 36px;border-radius:12px;border:1px solid var(--line);background:var(--card)}
+.search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--ink2)}
+@media (max-width:600px){.search{margin-left:0;max-width:none}}
+
+/* cartões */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow);min-width:0}
+.card .hd{display:flex;align-items:center;gap:12px}
+.ico{flex:none;width:46px;height:46px;border-radius:13px;display:grid;place-items:center;font:800 12px Archivo,sans-serif;letter-spacing:.04em;background:var(--dark);color:var(--lime)}
+.ico.apk{background:#2c4a10;color:#d8f5a0}
+.ico.link{background:#203a4a;color:#bfe3f7}
+.card h3{font-size:19px;font-weight:800;overflow-wrap:anywhere}
+.tag{font-size:12px;color:var(--ink2);font-weight:600}
+.card p{margin:0;color:var(--ink2);font-size:14px;flex:1;white-space:pre-line;overflow-wrap:anywhere}
+.meta{display:flex;flex-wrap:wrap;gap:6px}
+.pill{font-size:12px;font-weight:600;background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:3px 10px;color:var(--ink2)}
+.pill.new{background:var(--lime);color:var(--lime-ink);border-color:var(--lime)}
+.card .btn{width:100%;margin-top:4px}
+.empty{padding:30px;text-align:center;border:1px dashed var(--line);border-radius:var(--r);color:var(--ink2)}
+
+/* como usar */
+.how{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px}
+.box h3{font-size:20px;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.box ol{margin:0;padding-left:20px}
+.box li{margin:0 0 9px}
+.box code{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:13px;overflow-wrap:anywhere}
+@media (max-width:760px){.how{grid-template-columns:1fr}}
+
+details{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:0 18px;margin-bottom:8px}
+summary{cursor:pointer;font-weight:700;padding:15px 0;list-style:none;display:flex;justify-content:space-between;gap:10px}
+summary::-webkit-details-marker{display:none}
+summary:after{content:"+";font-size:20px;line-height:1;color:var(--ink2)}
+details[open] summary:after{content:"–"}
+details p{margin:0 0 16px;color:var(--ink2)}
+
+/* painel admin */
+.admin{background:var(--card);border:2px solid var(--olive2);border-radius:22px;padding:20px}
+.atabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row .who{flex:1 1 220px;min-width:0}
+.row .who b{display:block;overflow-wrap:anywhere}
+.row .who span{font-size:13px;color:var(--ink2);overflow-wrap:anywhere}
+.st{font-size:12px;font-weight:700;border-radius:99px;padding:3px 10px}
+.st.pendente{background:var(--warn-bg);color:var(--warn)}
+.st.aprovado{background:var(--ok-bg);color:var(--ok)}
+.st.negado{background:var(--bad-bg);color:var(--bad)}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600;color:var(--ink2);min-width:0}
+.form>*{min-width:0}
+.form input,.form select,.form textarea{width:100%;max-width:100%}
+.admin{min-width:0;overflow:hidden}
+.form .full{grid-column:1/-1}
+.form input,.form select,.form textarea{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font-weight:400;font-size:15px;min-width:0}
+.form textarea{min-height:90px;resize:vertical}
+.form ::placeholder{color:var(--ink2);opacity:.55;font-style:italic}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+@media (max-width:620px){.form{grid-template-columns:1fr}}
+.prog{height:8px;border-radius:99px;background:var(--bg);overflow:hidden;border:1px solid var(--line)}
+.prog i{display:block;height:100%;width:0;background:var(--olive2);transition:width .2s}
+
+footer{margin:56px 0 0;padding:26px 0 40px;border-top:1px solid var(--line);color:var(--ink2);font-size:13px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between}
+
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(30px);opacity:0;background:var(--dark);color:var(--on-dark);padding:12px 18px;border-radius:12px;font-size:14px;z-index:50;transition:.25s;max-width:calc(100% - 32px);text-align:center;pointer-events:none}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="demo hide" id="demo">
+  <div class="wrap">
+    <b>MODO DEMONSTRAÇÃO</b> — o Firebase ainda não foi ligado (config.js). Ver o site como:
+    <select id="demoAs" aria-label="Ver como">
+      <option value="visitante">Visitante (sem login)</option>
+      <option value="novo">Logado, sem pedido</option>
+      <option value="pendente">Pedido aguardando</option>
+      <option value="aprovado">Liberado</option>
+      <option value="negado">Pedido negado</option>
+      <option value="admin">Administrador</option>
+    </select>
+  </div>
+</div>
+
+<header>
+  <div class="wrap top">
+    <a class="logo" href="#"><i>R</i><span><b>MODS RBT</b><small>FARMING SIMULATOR 25</small></span></a>
+    <nav class="links"><a href="#arquivos">Arquivos</a><a href="#como">Como usar</a><a href="#duvidas">Dúvidas</a><a href="#admin" id="navAdmin" class="hide">Painel</a></nav>
+    <div id="account"></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="hero">
+    <div class="txt">
+      <div class="kicker">Feito para quem joga no campo</div>
+      <h1>GPS, tablet e<br>mods RBT.</h1>
+      <p>Tudo que o pessoal do servidor usa, sempre na versão mais nova. Entre com o Google, peça seu acesso e baixe.</p>
+      <div class="acts">
+        <a class="btn btn-lime" href="#arquivos">Ver arquivos</a>
+        <a class="btn btn-ghost" href="#como">Como instalar</a>
+      </div>
+    </div>
+    <div class="art" aria-hidden="true">
+      <div class="tab">
+        <svg viewBox="0 0 320 236">
+          <defs><pattern id="rows" width="22" height="236" patternUnits="userSpaceOnUse"><rect width="11" height="236" fill="#2f4a12"/><rect x="11" width="11" height="236" fill="#284010"/></pattern></defs>
+          <rect width="320" height="236" fill="#1d2b0c"/>
+          <rect x="0" y="0" width="154" height="236" fill="url(#rows)"/>
+          <rect x="154" y="0" width="166" height="236" fill="#3b2f1f"/>
+          <path d="M154 0V236" stroke="#b8e05a" stroke-width="2.5"/>
+          <path d="M198 0V236M110 0V236" stroke="#b8e05a" stroke-opacity=".35" stroke-width="1.5" stroke-dasharray="6 6"/>
+          <path d="M154 150l-13 26h26z" fill="#fff"/>
+          <rect x="10" y="10" width="92" height="26" rx="7" fill="#10130d" fill-opacity=".8"/>
+          <text x="20" y="28" font-family="Arial" font-weight="700" font-size="12" fill="#b8e05a">GPS RBT</text>
+          <rect x="216" y="10" width="94" height="26" rx="7" fill="#10130d" fill-opacity=".8"/>
+          <text x="226" y="28" font-family="Arial" font-weight="700" font-size="12" fill="#e9eee0">0,02 m ✓</text>
+          <rect x="10" y="200" width="300" height="26" rx="7" fill="#10130d" fill-opacity=".8"/>
+          <text x="20" y="218" font-family="Arial" font-size="11" fill="#a9b39c">PILOTO LIGADO · PASSADA 14</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="steps" id="steps">
+    <div class="step" data-s="1"><div class="n">1</div><div><b>Entrar com Google</b><span>Use sua conta do Gmail. Não precisa criar nada.</span></div></div>
+    <div class="step" data-s="2"><div class="n">2</div><div><b>Pedir acesso</b><span>Diga seu nome no jogo. O Rossato aprova.</span></div></div>
+    <div class="step" data-s="3"><div class="n">3</div><div><b>Baixar</b><span>Liberado uma vez, baixa sempre que quiser.</span></div></div>
+  </div>
+  <div id="status"></div>
+
+  <section id="admin" class="hide">
+    <div class="sh"><div><div class="kicker">Só para você</div><h2>Painel do administrador</h2></div></div>
+    <div class="admin">
+      <div class="atabs">
+        <button class="chip" data-at="pedidos" aria-pressed="true">Pedidos <span id="cntPend"></span></button>
+        <button class="chip" data-at="arquivos" aria-pressed="false">Enviar / editar arquivos</button>
+      </div>
+      <div id="atPedidos"></div>
+      <div id="atArquivos" class="hide">
+        <form class="form" id="fArq">
+          <input type="hidden" name="arqId">
+          <label>Nome que aparece<input name="nome" required maxlength="60" placeholder="ex.: GPS RBT"></label>
+          <label>Versão<input name="versao" maxlength="30" placeholder="ex.: 1.16.0.0"></label>
+          <label>Categoria<select name="categoria"><option>Mods</option><option>Aplicativos</option><option>Ferramentas</option></select></label>
+          <label>Ordem na lista (menor vem antes)<input name="ordem" type="number" value="10"></label>
+          <label class="full">Descrição / novidades<textarea name="descricao" maxlength="1500" placeholder="ex.: o que o mod faz e o que mudou nesta versão"></textarea></label>
+          <div class="full seg">
+            <button type="button" class="chip" data-modo="arquivo" aria-pressed="true">Enviar arquivo</button>
+            <button type="button" class="chip" data-modo="link" aria-pressed="false">Link externo (Drive, etc.)</button>
+          </div>
+          <label class="full" id="lbArq">Arquivo (.zip, .apk… até 20 MB)<input name="arquivo" type="file"></label>
+          <label class="full hide" id="lbLink">Link (só quem está liberado vê)<input name="link" type="url" placeholder="https://drive.google.com/..."></label>
+          <div class="full prog hide" id="prog"><i></i></div>
+          <div class="full" style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-dark" id="btSalvar">Publicar</button>
+            <button type="button" class="btn btn-ghost" id="btLimpar">Novo arquivo</button>
+          </div>
+        </form>
+        <div style="margin-top:22px" id="listaAdm"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="arquivos">
+    <div class="sh">
+      <div><div class="kicker">Central de arquivos</div><h2>Downloads</h2></div>
+      <div class="muted" id="cnt"></div>
+    </div>
+    <div class="bar">
+      <div class="chips" id="cats">
+        <button class="chip" data-c="" aria-pressed="true">Todos</button>
+        <button class="chip" data-c="Mods" aria-pressed="false">Mods</button>
+        <button class="chip" data-c="Aplicativos" aria-pressed="false">Aplicativos</button>
+        <button class="chip" data-c="Ferramentas" aria-pressed="false">Ferramentas</button>
+      </div>
+      <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="Buscar arquivo" aria-label="Buscar arquivo"></label>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section id="como">
+    <div class="sh"><div><div class="kicker">Do download ao jogo</div><h2>Como instalar</h2></div></div>
+    <div class="how">
+      <div class="box">
+        <h3>🚜 Mods (GPS RBT, Ajudas…)</h3>
+        <ol>
+          <li>Baixe o <b>.zip</b> do mod. <b>Não extraia</b>.</li>
+          <li>Copie o .zip para a pasta <code>Documentos\My Games\FarmingSimulator2025\mods</code>.</li>
+          <li>Se já tinha uma versão antiga, substitua (o nome é o mesmo).</li>
+          <li>No servidor: o admin sobe o mesmo .zip no G-Portal. Todos precisam da <b>mesma versão</b>.</li>
+        </ol>
+      </div>
+      <div class="box">
+        <h3>📱 Tablet RBT</h3>
+        <ol>
+          <li>Baixe o <b>Tablet RBT para PC</b>, extraia o .zip numa pasta (ex.: área de trabalho).</li>
+          <li>Abra <code>Tablet RBT.bat</code>. Na 1ª vez o Windows pergunta se permite alterações: clique <b>Sim</b>. Deixe a janela aberta.</li>
+          <li>No Android, instale o <b>APK</b> (ou abra o navegador) no <b>mesmo Wi-Fi</b> do PC e digite o endereço que a janela mostra.</li>
+          <li>Na 1ª vez, digite o código de 4 números da janela. Entre numa máquina no jogo.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section id="duvidas">
+    <div class="sh"><div><div class="kicker">Antes de começar</div><h2>Dúvidas</h2></div></div>
+    <details><summary>Por que preciso pedir acesso?</summary><p>Os mods RBT são feitos para o pessoal do servidor. Você entra com o Google uma vez, pede o acesso e, depois de aprovado, baixa sempre que quiser, em qualquer aparelho com a mesma conta.</p></details>
+    <details><summary>O aplicativo do tablet substitui o programa do PC?</summary><p>Não. O programa do PC (Tablet RBT.bat) lê o jogo e manda para o tablet. O app só mostra a tela e mantém ela acesa. Os dois precisam estar no mesmo Wi-Fi.</p></details>
+    <details><summary>Como instalar o APK no Android?</summary><p>Baixe o APK no próprio tablet, toque nele e, se o Android pedir, permita “instalar apps desta fonte” para o navegador. Depois é só abrir o Tablet RBT. Android 6.0 ou mais novo.</p></details>
+    <details><summary>O mod não aparece no jogo.</summary><p>Confira se o .zip está direto dentro da pasta <b>mods</b> (não dentro de outra pasta) e se não foi extraído. No servidor, a versão do mod tem que ser a mesma de todos.</p></details>
+    <details><summary>Cada mod tem ajuda dentro do jogo?</summary><p>Sim. Com o Ajudas RBT ativo, aperte ESC e abra a aba AJUDAS: tem a explicação de cada mod RBT que está ligado.</p></details>
+  </section>
+</main>
+
+<footer><div class="wrap"><span>Mods RBT · feito para o servidor Sul Paraná</span><span>Farming Simulator é marca da GIANTS Software. Mods não oficiais.</span></div></footer>
+<div class="toast" id="toast"></div>
+
+<script src="config.js"></script>
+<script type="module">
+const FB_VER = '10.12.2';
+const CFG = window.RBT_FIREBASE || {};
+const DEMO = !CFG.apiKey;
+const LIMITE = 20 * 1024 * 1024;      // 20 MB por arquivo
+const PEDACO = 700000;                 // caracteres base64 por documento (Firestore aceita até ~1 MB)
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const kb = n => !n ? '' : n < 1024*1024 ? (n/1024).toFixed(1).replace('.',',') + ' KB' : (n/1048576).toFixed(1).replace('.',',') + ' MB';
+const toDate = t => t ? (t.toDate ? t.toDate() : new Date(t)) : null;
+const dataBR = t => { const d = toDate(t); return d ? d.toLocaleDateString('pt-BR') : ''; };
+const recente = t => { const d = toDate(t); return d && (Date.now() - d) < 7*864e5; };
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 3200); }
+const G_ICON = '<svg class="gicon" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>';
+
+/* ---------- estado ---------- */
+const S = { user:null, admin:false, pedido:null, arquivos:[], pedidos:[], cat:'', q:'', modo:'arquivo' };
+
+/* ---------- camada de dados (Firebase ou demonstração) ---------- */
+let api;
+if (DEMO) {
+  $('#demo').classList.remove('hide');
+  const ex = [
+    {id:'gps', nome:'GPS RBT', categoria:'Mods', versao:'1.16.0.0', tamanho:92570, ordem:1, tipo:'arquivo', arquivoNome:'FS25_GPS_RBT.zip', atualizado:new Date(), descricao:'GPS completo com monitor na cabine, piloto, cabeceira e comandos pelo tablet.\nNovo: manobra Alt+U/I levanta e abaixa o implemento sozinho no eito.'},
+    {id:'tabpc', nome:'Tablet RBT para PC', categoria:'Ferramentas', versao:'24/11', tamanho:18556, ordem:2, tipo:'arquivo', arquivoNome:'Tablet_RBT.zip', atualizado:new Date(), descricao:'A ponte entre o FS25 e o tablet. Agora com um .bat só: na 1ª vez libera a rede sozinho.'},
+    {id:'apk', nome:'Tablet RBT para Android', categoria:'Aplicativos', versao:'1.0', tamanho:16854, ordem:3, tipo:'arquivo', arquivoNome:'Tablet-RBT.apk', atualizado:new Date(Date.now()-10*864e5), descricao:'Abre o painel no tablet, guarda o endereço do PC e mantém a tela acesa. Android 6.0 ou mais novo.'},
+    {id:'ajudas', nome:'Ajudas RBT', categoria:'Mods', versao:'1.1.10.0', tamanho:41000, ordem:4, tipo:'link', atualizado:new Date(Date.now()-20*864e5), descricao:'Aba AJUDAS no ESC com a explicação de cada mod RBT ativo.'}
+  ];
+  const peds = [
+    {id:'u1', nome:'Zé da Colheitadeira', email:'ze@exemplo.com', status:'pendente', quando:new Date()},
+    {id:'u2', nome:'Maria Plantio', email:'maria@exemplo.com', status:'aprovado', quando:new Date(Date.now()-3*864e5)},
+    {id:'u3', nome:'Curioso', email:'curioso@exemplo.com', status:'negado', quando:new Date(Date.now()-9*864e5)}
+  ];
+  const setAs = v => {
+    S.user = v === 'visitante' ? null : {uid:'demo', displayName: v === 'admin' ? 'Rossato' : 'Jogador Teste', email:'jogador@exemplo.com', photoURL:''};
+    S.admin = v === 'admin';
+    S.pedido = ['pendente','aprovado','negado'].includes(v) ? {status:v, nome:'Jogador Teste'} : null;
+  };
+  api = {
+    async start(){ $('#demoAs').onchange = e => { setAs(e.target.value); refresh(); }; setAs('visitante'); },
+    async entrar(){ $('#demoAs').value = 'novo'; setAs('novo'); refresh(); },
+    async sair(){ $('#demoAs').value = 'visitante'; setAs('visitante'); refresh(); },
+    async loadUser(){},
+    async pedir(nome){ S.pedido = {status:'pendente', nome}; $('#demoAs').value = 'pendente'; },
+    async listar(){ return ex.slice(); },
+    async baixar(a){ toast('Demonstração: aqui baixaria ' + (a.arquivoNome || a.nome)); },
+    async pedidos(){ return peds; },
+    async setStatus(id, st){ const p = peds.find(x => x.id === id); if (p) p.status = st; },
+    async apagarPedido(id){ peds.splice(peds.findIndex(x => x.id === id), 1); },
+    async salvar(meta, file, link, prog){ for (let i = 1; i <= 5; i++){ prog(i/5); await new Promise(r => setTimeout(r, 150)); }
+      const i = ex.findIndex(x => x.id === meta.id); const o = {...meta, id: meta.id || ('x' + Date.now()), tipo: file ? 'arquivo' : (link ? 'link' : (ex[i]?.tipo || 'arquivo')), tamanho: file ? file.size : ex[i]?.tamanho, arquivoNome: file ? file.name : ex[i]?.arquivoNome, atualizado:new Date()};
+      if (i >= 0) ex[i] = o; else ex.push(o); },
+    async apagar(id){ ex.splice(ex.findIndex(x => x.id === id), 1); }
+  };
+} else {
+  const base = `https://www.gstatic.com/firebasejs/${FB_VER}/`;
+  const [{initializeApp}, A, F] = await Promise.all([import(base + 'firebase-app.js'), import(base + 'firebase-auth.js'), import(base + 'firebase-firestore.js')]);
+  const app = initializeApp(CFG);
+  const auth = A.getAuth(app);
+  const db = F.getFirestore(app);
+  const prov = new A.GoogleAuthProvider();
+  prov.setCustomParameters({prompt:'select_account'});
+  const pad = n => 'p' + String(n).padStart(3, '0');
+  const lerBase64 = f => new Promise((ok, err) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1] || ''); r.onerror = err; r.readAsDataURL(f); });
+  api = {
+    async start(){
+      A.getRedirectResult(auth).catch(() => {});
+      A.onAuthStateChanged(auth, async u => { S.user = u; await api.loadUser(); refresh(); });
+    },
+    async entrar(){
+      try { await A.signInWithPopup(auth, prov); }
+      catch(e){
+        if (['auth/popup-blocked','auth/operation-not-supported-in-this-environment'].includes(e.code)) return A.signInWithRedirect(auth, prov);
+        if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') toast('Não entrou: ' + (e.code || e.message));
+      }
+    },
+    async sair(){ await A.signOut(auth); },
+    async loadUser(){
+      S.admin = false; S.pedido = null;
+      if (!S.user) return;
+      try { S.admin = (await F.getDoc(F.doc(db, 'admins', S.user.email))).exists(); } catch {}
+      try { const p = await F.getDoc(F.doc(db, 'pedidos', S.user.uid)); S.pedido = p.exists() ? p.data() : null; } catch {}
+    },
+    async pedir(nome){
+      const d = {nome, email:S.user.email, foto:S.user.photoURL || '', google:S.user.displayName || '', status:'pendente', quando:F.serverTimestamp()};
+      await F.setDoc(F.doc(db, 'pedidos', S.user.uid), d);
+      S.pedido = {...d, quando:new Date()};
+    },
+    async listar(){ const r = await F.getDocs(F.collection(db, 'arquivos')); return r.docs.map(d => ({id:d.id, ...d.data()})); },
+    async baixar(a){
+      const r = await F.getDocs(F.collection(db, 'arquivos', a.id, 'partes'));
+      const docs = r.docs.sort((x, y) => x.id < y.id ? -1 : 1).map(d => d.data());
+      if (docs[0]?.url) { window.open(docs[0].url, '_blank', 'noopener'); return; }
+      const b64 = docs.map(d => d.dados || '').join('');
+      if (!b64) throw new Error('arquivo vazio');
+      const blob = await (await fetch('data:application/octet-stream;base64,' + b64)).blob();
+      const u = URL.createObjectURL(blob);
+      const el = Object.assign(document.createElement('a'), {href:u, download:a.arquivoNome || (a.nome + '.zip')});
+      document.body.appendChild(el); el.click(); el.remove();
+      setTimeout(() => URL.revokeObjectURL(u), 60000);
+    },
+    async pedidos(){ const r = await F.getDocs(F.collection(db, 'pedidos')); return r.docs.map(d => ({id:d.id, ...d.data()})); },
+    async setStatus(id, st){ await F.updateDoc(F.doc(db, 'pedidos', id), {status:st, decidido:F.serverTimestamp()}); },
+    async apagarPedido(id){ await F.deleteDoc(F.doc(db, 'pedidos', id)); },
+    async salvar(meta, file, link, prog){
+      const id = meta.id || meta.nome.normalize('NFD').replace(/[^\w]+/g, '_').replace(/^_|_$/g, '').toLowerCase().slice(0, 40) + '_' + Date.now().toString(36);
+      const ref = F.doc(db, 'arquivos', id);
+      const antigo = await F.getDoc(ref);
+      const m = {nome:meta.nome, versao:meta.versao, categoria:meta.categoria, descricao:meta.descricao, ordem:Number(meta.ordem) || 0, atualizado:F.serverTimestamp()};
+      if (file || link) {
+        const velhas = await F.getDocs(F.collection(db, 'arquivos', id, 'partes'));
+        let novas = [];
+        if (file) {
+          const b64 = await lerBase64(file);
+          for (let i = 0; i < b64.length; i += PEDACO) novas.push({dados:b64.slice(i, i + PEDACO)});
+          Object.assign(m, {tipo:'arquivo', tamanho:file.size, arquivoNome:file.name});
+        } else { novas = [{url:link}]; Object.assign(m, {tipo:'link', tamanho:0, arquivoNome:''}); }
+        for (let i = 0; i < novas.length; i++) { await F.setDoc(F.doc(db, 'arquivos', id, 'partes', pad(i)), novas[i]); prog((i + 1) / (novas.length + 1)); }
+        for (const d of velhas.docs) if (Number(d.id.slice(1)) >= novas.length) await F.deleteDoc(d.ref);
+      } else if (!antigo.exists()) throw new Error('escolha o arquivo ou o link');
+      await F.setDoc(ref, m, {merge:true});
+      prog(1);
+    },
+    async apagar(id){
+      const r = await F.getDocs(F.collection(db, 'arquivos', id, 'partes'));
+      for (const d of r.docs) await F.deleteDoc(d.ref);
+      await F.deleteDoc(F.doc(db, 'arquivos', id));
+    }
+  };
+}
+
+/* ---------- telas ---------- */
+const liberado = () => S.admin || S.pedido?.status === 'aprovado';
+
+function renderConta(){
+  const el = $('#account');
+  if (!S.user) { el.innerHTML = `<button class="btn btn-ghost btn-sm" id="btIn">${G_ICON}Entrar</button>`; $('#btIn').onclick = () => api.entrar(); return; }
+  const nome = S.user.displayName || S.user.email;
+  const av = S.user.photoURL ? `<img src="${esc(S.user.photoURL)}" alt="" referrerpolicy="no-referrer">` : `<span class="av">${esc(nome[0] || '?').toUpperCase()}</span>`;
+  el.innerHTML = `<div class="me">${av}<span class="who">${esc(nome)}<br><span class="muted" style="font-size:12px">${S.admin ? 'administrador' : liberado() ? 'liberado' : 'sem acesso'}</span></span><button class="btn btn-ghost btn-sm" id="btOut">Sair</button></div>`;
+  $('#btOut').onclick = () => api.sair();
+}
+
+function renderStatus(){
+  let etapa = !S.user ? 1 : (!S.pedido && !S.admin) || S.pedido?.status === 'negado' ? 2 : liberado() ? 4 : 3;
+  document.querySelectorAll('.step').forEach(s => {
+    const n = +s.dataset.s;
+    s.classList.toggle('done', n < etapa || (etapa === 4 && n <= 3) || (etapa === 3 && n === 2));
+    s.classList.toggle('now', (etapa === 1 && n === 1) || (etapa === 2 && n === 2) || (etapa >= 3 && n === 3));
+  });
+  const el = $('#status');
+  if (!S.user) {
+    el.innerHTML = `<div class="status"><p><b>Entre com sua conta Google</b> para pedir o acesso aos downloads. Você vê a lista de arquivos mesmo sem entrar.</p><button class="btn btn-dark" id="btIn2">${G_ICON}Entrar com Google</button></div>`;
+    $('#btIn2').onclick = () => api.entrar();
+  } else if (S.admin) {
+    el.innerHTML = `<div class="status ok"><p><b>Você é o administrador.</b> Pode baixar tudo, aprovar pedidos e publicar arquivos no painel.</p><a class="btn btn-dark btn-sm" href="#admin">Abrir painel</a></div>`;
+  } else if (!S.pedido) {
+    el.innerHTML = `<div class="status warn"><p><b>Falta pedir o acesso.</b> Diga seu nome no jogo para o Rossato saber quem é.</p><form id="fPed"><input name="nome" required maxlength="40" placeholder="Seu nome no jogo" value="${esc(S.user.displayName || '')}"><button class="btn btn-dark">Pedir acesso</button></form></div>`;
+    $('#fPed').onsubmit = async e => { e.preventDefault(); const nome = e.target.nome.value.trim(); if (!nome) return;
+      try { await api.pedir(nome); toast('Pedido enviado! Avise o Rossato no grupo.'); refresh(); } catch(err){ toast('Não enviou: ' + err.message); } };
+  } else if (S.pedido.status === 'pendente') {
+    el.innerHTML = `<div class="status warn"><p><b>Pedido enviado, aguardando liberação.</b> Avise o Rossato no grupo. Quando ele aprovar, é só voltar aqui (ou recarregar a página).</p><button class="btn btn-ghost btn-sm" id="btRec">Conferir de novo</button></div>`;
+    $('#btRec').onclick = async () => { await api.loadUser(); refresh(); if (!liberado()) toast('Ainda aguardando.'); };
+  } else if (S.pedido.status === 'aprovado') {
+    el.innerHTML = `<div class="status ok"><p><b>Acesso liberado.</b> Bom jogo! Os botões de baixar estão abertos.</p><a class="btn btn-dark btn-sm" href="#arquivos">Ir para os arquivos</a></div>`;
+  } else {
+    el.innerHTML = `<div class="status bad"><p><b>Seu pedido não foi aprovado.</b> Fale com o Rossato no grupo se achar que foi engano.</p></div>`;
+  }
+}
+
+function icone(a){
+  const ext = (a.arquivoNome || '').split('.').pop().toUpperCase();
+  if (a.tipo === 'link') return '<div class="ico link">LINK</div>';
+  if (ext === 'APK') return '<div class="ico apk">APK</div>';
+  return `<div class="ico">${esc(ext && ext.length <= 4 ? ext : 'ZIP')}</div>`;
+}
+
+function renderGrid(){
+  const q = S.q.trim().toLowerCase();
+  const lista = S.arquivos
+    .filter(a => !S.cat || a.categoria === S.cat)
+    .filter(a => !q || (a.nome + ' ' + a.descricao + ' ' + a.categoria).toLowerCase().includes(q))
+    .sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0) || String(a.nome).localeCompare(b.nome));
+  $('#cnt').textContent = S.arquivos.length + (S.arquivos.length === 1 ? ' arquivo' : ' arquivos');
+  if (!lista.length) { $('#grid').innerHTML = `<div class="empty">${S.arquivos.length ? 'Nada encontrado com esse filtro.' : 'Nenhum arquivo publicado ainda.'}</div>`; return; }
+  $('#grid').innerHTML = lista.map(a => {
+    const bt = liberado() ? `<button class="btn btn-lime" data-baixar="${esc(a.id)}">${a.tipo === 'link' ? 'Abrir link' : 'Baixar'}</button>`
+      : !S.user ? `<button class="btn btn-ghost" data-entrar>Entrar para baixar</button>`
+      : `<button class="btn btn-ghost" disabled>${S.pedido?.status === 'pendente' ? 'Aguardando liberação' : 'Peça acesso acima'}</button>`;
+    return `<article class="card">
+      <div class="hd">${icone(a)}<div style="min-width:0"><h3>${esc(a.nome)}</h3><div class="tag">${esc(a.categoria || '')}</div></div></div>
+      <p>${esc(a.descricao || '')}</p>
+      <div class="meta">${a.versao ? `<span class="pill">Versão ${esc(a.versao)}</span>` : ''}${a.tamanho ? `<span class="pill">${kb(a.tamanho)}</span>` : ''}${a.atualizado ? `<span class="pill ${recente(a.atualizado) ? 'new' : ''}">${recente(a.atualizado) ? 'Novo · ' : ''}${dataBR(a.atualizado)}</span>` : ''}</div>
+      ${bt}</article>`;
+  }).join('');
+}
+
+function renderAdmin(){
+  $('#admin').classList.toggle('hide', !S.admin);
+  $('#navAdmin').classList.toggle('hide', !S.admin);
+  if (!S.admin) return;
+  const ord = {pendente:0, aprovado:1, negado:2};
+  const ps = S.pedidos.slice().sort((a, b) => (ord[a.status] ?? 3) - (ord[b.status] ?? 3) || (toDate(b.quando) || 0) - (toDate(a.quando) || 0));
+  const pend = ps.filter(p => p.status === 'pendente').length;
+  $('#cntPend').textContent = pend ? `(${pend})` : '';
+  $('#atPedidos').innerHTML = ps.length ? ps.map(p => `<div class="row">
+      <div class="who"><b>${esc(p.nome)}</b><span>${esc(p.email)} · ${dataBR(p.quando)}</span></div>
+      <span class="st ${esc(p.status)}">${esc(p.status)}</span>
+      ${p.status !== 'aprovado' ? `<button class="btn btn-dark btn-sm" data-ped="${esc(p.id)}" data-st="aprovado">Aprovar</button>` : ''}
+      ${p.status !== 'negado' ? `<button class="btn btn-ghost btn-sm" data-ped="${esc(p.id)}" data-st="negado">${p.status === 'aprovado' ? 'Tirar acesso' : 'Negar'}</button>` : ''}
+      <button class="btn btn-bad btn-sm" data-delped="${esc(p.id)}" title="Apagar o pedido (a pessoa pode pedir de novo)">Apagar</button>
+    </div>`).join('') : '<div class="empty">Nenhum pedido ainda.</div>';
+  const as = S.arquivos.slice().sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
+  $('#listaAdm').innerHTML = '<h3 style="font-size:17px;margin-bottom:6px">Publicados</h3>' + (as.length ? as.map(a => `<div class="row">
+      <div class="who"><b>${esc(a.nome)} ${a.versao ? '· ' + esc(a.versao) : ''}</b><span>${esc(a.categoria)} · ${a.tipo === 'link' ? 'link' : esc(a.arquivoNome || '') + ' ' + kb(a.tamanho)} · ${dataBR(a.atualizado)}</span></div>
+      <button class="btn btn-ghost btn-sm" data-edit="${esc(a.id)}">Editar / nova versão</button>
+      <button class="btn btn-bad btn-sm" data-del="${esc(a.id)}">Apagar</button></div>`).join('') : '<div class="empty">Nada publicado.</div>');
+}
+
+async function refresh(){
+  try { S.arquivos = await api.listar(); } catch(e){ S.arquivos = []; toast('Não carregou a lista: ' + e.message); }
+  if (S.admin) { try { S.pedidos = await api.pedidos(); } catch(e){ S.pedidos = []; } }
+  renderConta(); renderStatus(); renderGrid(); renderAdmin();
+}
+
+/* ---------- eventos ---------- */
+$('#cats').onclick = e => { const b = e.target.closest('[data-c]'); if (!b) return; S.cat = b.dataset.c; document.querySelectorAll('#cats .chip').forEach(c => c.setAttribute('aria-pressed', c === b)); renderGrid(); };
+$('#q').oninput = e => { S.q = e.target.value; renderGrid(); };
+$('#grid').onclick = async e => {
+  if (e.target.closest('[data-entrar]')) return api.entrar();
+  const b = e.target.closest('[data-baixar]'); if (!b) return;
+  const a = S.arquivos.find(x => x.id === b.dataset.baixar); const txt = b.textContent;
+  b.disabled = true; b.textContent = 'Baixando…';
+  try { await api.baixar(a); } catch(err){ toast('Não baixou: ' + (err.code === 'permission-denied' ? 'acesso ainda não liberado' : err.message)); }
+  b.disabled = false; b.textContent = txt;
+};
+document.querySelector('.atabs').onclick = e => { const b = e.target.closest('[data-at]'); if (!b) return;
+  document.querySelectorAll('.atabs .chip').forEach(c => c.setAttribute('aria-pressed', c === b));
+  $('#atPedidos').classList.toggle('hide', b.dataset.at !== 'pedidos'); $('#atArquivos').classList.toggle('hide', b.dataset.at !== 'arquivos'); };
+$('#atPedidos').onclick = async e => {
+  const b = e.target.closest('[data-ped]'), d = e.target.closest('[data-delped]');
+  try {
+    if (b) { await api.setStatus(b.dataset.ped, b.dataset.st); toast(b.dataset.st === 'aprovado' ? 'Liberado!' : 'Feito.'); }
+    else if (d) { if (!confirm('Apagar este pedido? A pessoa poderá pedir de novo.')) return; await api.apagarPedido(d.dataset.delped); }
+    else return;
+    S.pedidos = await api.pedidos(); renderAdmin();
+  } catch(err){ toast('Erro: ' + err.message); }
+};
+const fA = $('#fArq');
+const setModo = m => { S.modo = m; document.querySelectorAll('[data-modo]').forEach(c => c.setAttribute('aria-pressed', c.dataset.modo === m)); $('#lbArq').classList.toggle('hide', m !== 'arquivo'); $('#lbLink').classList.toggle('hide', m !== 'link'); };
+document.querySelectorAll('[data-modo]').forEach(c => c.onclick = () => setModo(c.dataset.modo));
+const limpar = () => { fA.reset(); fA.arqId.value = ''; setModo('arquivo'); $('#btSalvar').textContent = 'Publicar'; };
+$('#btLimpar').onclick = limpar;
+$('#listaAdm').onclick = async e => {
+  const ed = e.target.closest('[data-edit]'), del = e.target.closest('[data-del]');
+  if (ed) { const a = S.arquivos.find(x => x.id === ed.dataset.edit);
+    fA.arqId.value = a.id; for (const k of ['nome','versao','categoria','ordem','descricao']) fA[k].value = a[k] ?? '';
+    setModo(a.tipo === 'link' ? 'link' : 'arquivo'); $('#btSalvar').textContent = 'Salvar alterações';
+    fA.scrollIntoView({behavior:'smooth', block:'start'}); toast('Para trocar o arquivo, escolha o novo. Se não escolher, mantém o atual.'); }
+  if (del) { const a = S.arquivos.find(x => x.id === del.dataset.del);
+    if (!confirm(`Apagar "${a.nome}" do site? Não dá para desfazer.`)) return;
+    try { await api.apagar(a.id); toast('Apagado.'); await refresh(); } catch(err){ toast('Erro: ' + err.message); } }
+};
+// lê <version> do modDesc.xml de dentro do .zip escolhido e preenche o campo Versão sozinho
+async function versaoDoZip(file){
+  const buf = new Uint8Array(await file.arrayBuffer()), dv = new DataView(buf.buffer);
+  let eocd = -1;
+  for (let i = buf.length - 22; i >= Math.max(0, buf.length - 65557); i--) if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  if (eocd < 0) return '';
+  let p = dv.getUint32(eocd + 16, true); const n = dv.getUint16(eocd + 10, true);
+  for (let k = 0; k < n && dv.getUint32(p, true) === 0x02014b50; k++) {
+    const metodo = dv.getUint16(p + 10, true), tam = dv.getUint32(p + 20, true);
+    const ln = dv.getUint16(p + 28, true), lx = dv.getUint16(p + 30, true), lc = dv.getUint16(p + 32, true), loc = dv.getUint32(p + 42, true);
+    const nome = new TextDecoder().decode(buf.subarray(p + 46, p + 46 + ln));
+    if (nome.toLowerCase() === 'moddesc.xml') {
+      const ini = loc + 30 + dv.getUint16(loc + 26, true) + dv.getUint16(loc + 28, true);
+      let dados = buf.subarray(ini, ini + tam);
+      if (metodo === 8) dados = new Uint8Array(await new Response(new Blob([dados]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer());
+      else if (metodo !== 0) return '';
+      const m = new TextDecoder().decode(dados).match(/<version>\s*([^<]+?)\s*<\/version>/i);
+      return m ? m[1] : '';
+    }
+    p += 46 + ln + lx + lc;
+  }
+  return '';
+}
+fA.arquivo.onchange = async () => {
+  const f = fA.arquivo.files[0];
+  if (!f || !/\.zip$/i.test(f.name)) return;
+  try { const v = await versaoDoZip(f); if (v) { fA.versao.value = v; toast('Versão lida do mod: ' + v); } } catch {}
+};
+fA.onsubmit = async e => {
+  e.preventDefault();
+  const file = S.modo === 'arquivo' ? fA.arquivo.files[0] : null;
+  const link = S.modo === 'link' ? fA.link.value.trim() : '';
+  if (file && file.size > LIMITE) return toast('Arquivo maior que 20 MB: use "Link externo".');
+  if (!fA.arqId.value && !file && !link) return toast('Escolha o arquivo (ou o link).');
+  const meta = {id:fA.arqId.value, nome:fA.nome.value.trim(), versao:fA.versao.value.trim(), categoria:fA.categoria.value, ordem:fA.ordem.value, descricao:fA.descricao.value.trim()};
+  const bt = $('#btSalvar'), pg = $('#prog'); bt.disabled = true; pg.classList.remove('hide');
+  try { await api.salvar(meta, file, link, p => pg.firstElementChild.style.width = Math.round(p * 100) + '%'); toast('Publicado!'); limpar(); await refresh(); }
+  catch(err){ toast('Não publicou: ' + err.message); }
+  bt.disabled = false; setTimeout(() => { pg.classList.add('hide'); pg.firstElementChild.style.width = '0'; }, 600);
+};
+
+await api.start();
+await refresh();
+</script>
+</body>
+</html>
