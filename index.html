@@ -302,7 +302,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between}
           <li>Baixe o <b>.zip</b> do mod. <b>Não extraia</b>.</li>
           <li>Copie o .zip para a pasta <code>Documentos\My Games\FarmingSimulator2025\mods</code>.</li>
           <li>Se já tinha uma versão antiga, substitua (o nome é o mesmo).</li>
-          <li>No servidor: o admin sobe o mesmo .zip no G-Portal. Todos precisam da <b>mesma versão</b>.</li>
+          <li>Servidor dedicado (alugado ou próprio): o admin põe o mesmo .zip na pasta mods do servidor, pelo painel ou FTP. Todos precisam da <b>mesma versão</b>.</li>
         </ol>
       </div>
       <div class="box">
@@ -514,7 +514,7 @@ function renderGrid(){
   const lista = S.arquivos
     .filter(a => !S.cat || a.categoria === S.cat)
     .filter(a => !q || (a.nome + ' ' + a.descricao + ' ' + a.categoria).toLowerCase().includes(q))
-    .sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0) || String(a.nome).localeCompare(b.nome));
+    .sort((a, b) => (toDate(b.atualizado) || 0) - (toDate(a.atualizado) || 0) || String(a.nome).localeCompare(b.nome)); // mais novo primeiro
   $('#cnt').textContent = S.arquivos.length + (S.arquivos.length === 1 ? ' arquivo' : ' arquivos');
   if (!lista.length) { $('#grid').innerHTML = `<div class="empty">${S.arquivos.length ? 'Nada encontrado com esse filtro.' : 'Nenhum arquivo publicado ainda.'}</div>`; return; }
   $('#grid').innerHTML = lista.map(a => {
@@ -566,7 +566,7 @@ function renderAdmin(){
   $('#campo').innerHTML = s;
 })();
 function renderAbertura(){
-  const as = S.arquivos.slice().sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
+  const as = S.arquivos.slice().sort((a, b) => (toDate(b.atualizado) || 0) - (toDate(a.atualizado) || 0));
   const itens = as.length ? as.map(a => `<span>${esc(a.nome)}${a.versao ? ` <em>${esc(a.versao)}</em>` : ''}</span>`)
     : ['GPS', 'Tablet', 'Máquinas', 'Ferramentas', 'Atualizações'].map(t => `<span>${t}</span>`);
   let fila = itens.join('');
