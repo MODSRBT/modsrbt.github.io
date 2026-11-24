@@ -67,18 +67,31 @@ nav.links a:hover{color:var(--ink);background:var(--card)}
 .demo select{padding:4px 8px;border-radius:8px;border:1px solid #e0c48a;background:#fff;color:#5a3d00}
 
 /* hero */
-.hero{margin:22px 0 8px;background:var(--dark);color:var(--on-dark);border-radius:26px;overflow:hidden;position:relative;display:grid;grid-template-columns:1.1fr .9fr}
-.hero:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,transparent 0 46px,rgba(184,224,90,.045) 46px 92px);pointer-events:none}
-.hero .txt{padding:44px 40px;position:relative}
+.hero{margin:22px 0 8px;background:linear-gradient(#0c0f09 0%,#141a0e 46%,#24300f 60%);color:var(--on-dark);border-radius:26px;overflow:hidden;position:relative;min-height:500px;display:flex;flex-direction:column;isolation:isolate}
+.hero .campo{position:absolute;left:0;right:0;bottom:0;width:100%;height:100%;z-index:-1}
+.hero .campo .rua{stroke:#b8e05a;stroke-width:1.6;stroke-dasharray:14 22;opacity:.55;animation:anda 1.6s linear infinite}
+@keyframes anda{to{stroke-dashoffset:-36}}
+.hero .txt{position:relative;text-align:center;padding:46px 24px 30px;flex:1;display:flex;flex-direction:column;align-items:center}
 .kicker{font:700 12px Inter,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--lime)}
-.hero h1{font-size:clamp(34px,5.2vw,54px);font-weight:900;margin:12px 0 14px;letter-spacing:-.01em}
-.hero p{color:var(--on-dark2);max-width:470px;margin:0 0 22px;font-size:17px}
-.hero .acts{display:flex;flex-wrap:wrap;gap:10px}
-.hero .btn-ghost{background:transparent;color:var(--on-dark);border-color:#3a4330}
-.art{position:relative;display:grid;place-items:center;padding:30px}
-.tab{width:min(360px,100%);aspect-ratio:4/3;background:#10130d;border-radius:22px;padding:12px;box-shadow:0 20px 50px rgba(0,0,0,.45),inset 0 0 0 2px #2c3324;transform:rotate(-4deg)}
-.tab svg{width:100%;height:100%;display:block;border-radius:12px}
-@media (max-width:820px){.hero{grid-template-columns:1fr}.hero .txt{padding:32px 22px 8px}.art{padding:8px 22px 30px}}
+.hero .kicker{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid rgba(184,224,90,.35);border-radius:99px;background:rgba(12,15,9,.55)}
+.hero .kicker:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 10px var(--lime);animation:pisca 2s ease-in-out infinite}
+@keyframes pisca{50%{opacity:.25}}
+.marca{font:italic 900 clamp(58px,14.5vw,168px)/.86 Archivo,sans-serif;letter-spacing:-.03em;margin:18px 0 14px;display:flex;flex-wrap:wrap;justify-content:center;gap:0 .22em;text-transform:uppercase}
+.marca .m{color:transparent;-webkit-text-stroke:2px #e9eee0;text-shadow:none}
+.marca .r{color:var(--lime);text-shadow:0 0 38px rgba(184,224,90,.45),0 6px 0 #4a6a08}
+.hero p{color:#dfe5d4;max-width:540px;margin:0 0 22px;font-size:17px;padding:10px 16px;border-radius:14px;background:rgba(10,13,8,.6);backdrop-filter:blur(4px)}
+.hero .acts{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.hero .btn-ghost{background:rgba(12,15,9,.55);color:var(--on-dark);border-color:#4a5540}
+.hero .num{margin-top:18px;font-size:13px;color:#a9b39c;text-shadow:0 1px 6px #0c0f09}
+.hero .num b{color:#e9eee0}
+.ticker{position:relative;border-top:1px solid rgba(184,224,90,.25);background:rgba(10,13,8,.82);overflow:hidden;white-space:nowrap;padding:11px 0}
+.ticker .trk{display:inline-flex;animation:rola 38s linear infinite}
+.ticker span{font:800 14px Archivo,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#e9eee0;padding:0 18px;display:inline-flex;align-items:center;gap:18px}
+.ticker span:after{content:"";width:8px;height:8px;background:var(--lime);transform:rotate(45deg)}
+.ticker span em{font-style:normal;color:var(--lime);font-weight:700;margin-left:-10px}
+@keyframes rola{to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){.hero .campo .rua,.ticker .trk,.hero .kicker:before{animation:none}}
+@media (max-width:820px){.hero{min-height:440px}.hero .txt{padding:34px 16px 24px}.marca .m{-webkit-text-stroke-width:1.5px}.hero .kicker{font-size:10.5px;letter-spacing:.1em;white-space:nowrap}.hero p{font-size:15.5px}}
 
 /* passos de acesso */
 .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0 0}
@@ -209,34 +222,18 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between}
 
 <main class="wrap">
   <div class="hero">
+    <svg class="campo" id="campo" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg>
     <div class="txt">
-      <div class="kicker">Feito para quem joga no campo</div>
-      <h1>GPS, tablet e<br>mods RBT.</h1>
-      <p>Tudo que o pessoal do servidor usa, sempre na versão mais nova. Entre com o Google, peça seu acesso e baixe.</p>
+      <div class="kicker">Farming Simulator 25 · Servidor RBT</div>
+      <h1 class="marca"><span class="m">Mods</span><span class="r">RBT</span></h1>
+      <p>Os mods do nosso servidor num lugar só, sempre na versão mais nova. Entre com o Google, peça seu acesso e baixe.</p>
       <div class="acts">
         <a class="btn btn-lime" href="#arquivos">Ver arquivos</a>
         <a class="btn btn-ghost" href="#como">Como instalar</a>
       </div>
+      <div class="num" id="hNum"></div>
     </div>
-    <div class="art" aria-hidden="true">
-      <div class="tab">
-        <svg viewBox="0 0 320 236">
-          <defs><pattern id="rows" width="22" height="236" patternUnits="userSpaceOnUse"><rect width="11" height="236" fill="#2f4a12"/><rect x="11" width="11" height="236" fill="#284010"/></pattern></defs>
-          <rect width="320" height="236" fill="#1d2b0c"/>
-          <rect x="0" y="0" width="154" height="236" fill="url(#rows)"/>
-          <rect x="154" y="0" width="166" height="236" fill="#3b2f1f"/>
-          <path d="M154 0V236" stroke="#b8e05a" stroke-width="2.5"/>
-          <path d="M198 0V236M110 0V236" stroke="#b8e05a" stroke-opacity=".35" stroke-width="1.5" stroke-dasharray="6 6"/>
-          <path d="M154 150l-13 26h26z" fill="#fff"/>
-          <rect x="10" y="10" width="92" height="26" rx="7" fill="#10130d" fill-opacity=".8"/>
-          <text x="20" y="28" font-family="Arial" font-weight="700" font-size="12" fill="#b8e05a">GPS RBT</text>
-          <rect x="216" y="10" width="94" height="26" rx="7" fill="#10130d" fill-opacity=".8"/>
-          <text x="226" y="28" font-family="Arial" font-weight="700" font-size="12" fill="#e9eee0">0,02 m ✓</text>
-          <rect x="10" y="200" width="300" height="26" rx="7" fill="#10130d" fill-opacity=".8"/>
-          <text x="20" y="218" font-family="Arial" font-size="11" fill="#a9b39c">PILOTO LIGADO · PASSADA 14</text>
-        </svg>
-      </div>
-    </div>
+    <div class="ticker" aria-hidden="true"><div class="trk" id="tick"></div></div>
   </div>
 
   <div class="steps" id="steps">
@@ -554,10 +551,35 @@ function renderAdmin(){
       <button class="btn btn-bad btn-sm" data-del="${esc(a.id)}">Apagar</button></div>`).join('') : '<div class="empty">Nada publicado.</div>');
 }
 
+/* abertura: campo em perspectiva + faixa com os arquivos */
+(function campo(){
+  const H = 255, V = 500, ns = 'http://www.w3.org/2000/svg';
+  let s = `<defs><radialGradient id="sol" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#d8f58a" stop-opacity=".95"/><stop offset=".25" stop-color="#b8e05a" stop-opacity=".35"/><stop offset="1" stop-color="#b8e05a" stop-opacity="0"/></radialGradient>
+    <linearGradient id="nevo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0c0f09" stop-opacity=".0"/><stop offset=".08" stop-color="#0c0f09" stop-opacity=".75"/><stop offset=".45" stop-color="#0c0f09" stop-opacity="0"/></linearGradient></defs>
+    <circle cx="500" cy="${H}" r="210" fill="url(#sol)"/><circle cx="500" cy="${H}" r="46" fill="#d8f58a" opacity=".9"/>`;
+  for (let i = -14, k = 0; i < 14; i++, k++) {
+    const x1 = 500 + i * 130, x2 = 500 + (i + 1) * 130;
+    s += `<polygon points="500,${H} ${x1},${V} ${x2},${V}" fill="${k % 2 ? '#22340c' : '#1a2809'}"/>`;
+  }
+  for (let i = -13; i <= 13; i += 2) s += `<line class="rua" x1="500" y1="${H}" x2="${500 + i * 130}" y2="${V}"/>`;
+  s += `<rect x="0" y="${H}" width="1000" height="${V - H}" fill="url(#nevo)"/><line x1="0" y1="${H}" x2="1000" y2="${H}" stroke="#b8e05a" stroke-opacity=".5"/>`;
+  $('#campo').innerHTML = s;
+})();
+function renderAbertura(){
+  const as = S.arquivos.slice().sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
+  const itens = as.length ? as.map(a => `<span>${esc(a.nome)}${a.versao ? ` <em>${esc(a.versao)}</em>` : ''}</span>`)
+    : ['GPS', 'Tablet', 'Máquinas', 'Ferramentas', 'Atualizações'].map(t => `<span>${t}</span>`);
+  let fila = itens.join('');
+  while ((fila.match(/<span>/g) || []).length < 8) fila += itens.join('');
+  $('#tick').innerHTML = fila + fila;
+  const ult = as.map(a => toDate(a.atualizado)).filter(Boolean).sort((a, b) => b - a)[0];
+  $('#hNum').innerHTML = as.length ? `<b>${as.length}</b> ${as.length === 1 ? 'arquivo' : 'arquivos'}${ult ? ` · atualizado em <b>${dataBR(ult)}</b>` : ''}` : '';
+}
+
 async function refresh(){
   try { S.arquivos = await api.listar(); } catch(e){ S.arquivos = []; toast('Não carregou a lista: ' + e.message); }
   if (S.admin) { try { S.pedidos = await api.pedidos(); } catch(e){ S.pedidos = []; } }
-  renderConta(); renderStatus(); renderGrid(); renderAdmin();
+  renderConta(); renderStatus(); renderGrid(); renderAdmin(); renderAbertura();
 }
 
 /* ---------- eventos ---------- */
