@@ -142,6 +142,23 @@ section{padding:46px 0 6px;scroll-margin-top:60px}
 .tag{font-size:12px;color:var(--ink2);font-weight:600}
 .orig{align-self:flex-start;font-size:12.5px;padding:4px 10px;border-radius:99px;border:1px dashed var(--olive2);color:var(--ink2);background:color-mix(in srgb,var(--lime) 14%,transparent)}
 .orig b{color:var(--ink)}
+.meus{background:var(--card,#fff);border:1px solid var(--line);border-radius:18px;padding:18px;display:grid;gap:12px}
+.meus p{margin:0}
+.meus>*{min-width:0}
+.meus .btn{white-space:normal;text-align:center}
+.meus code{font-size:12.5px;background:color-mix(in srgb,var(--ink) 8%,transparent);padding:1px 6px;border-radius:6px;word-break:break-all}
+.meus .acts{display:flex;flex-wrap:wrap;gap:8px}
+.mres{display:flex;flex-wrap:wrap;gap:6px}
+.mlista{display:grid;gap:6px}
+.mrow{display:flex;gap:10px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:12px;padding:9px 12px}
+.mrow .who{display:grid;gap:2px;min-width:0}
+.mrow .who span{font-size:12.5px;color:var(--ink2);overflow-wrap:anywhere}
+.mrow .aviso{color:#b45309!important;font-weight:600}
+.mst{flex:none;font-size:12px;font-weight:700;padding:3px 9px;border-radius:99px;border:1px solid var(--line)}
+.mst.ok{background:#e6f4d7;color:#2f5a07;border-color:#bfe39a}
+.mst.velho{background:#fff3d6;color:#8a5a00;border-color:#f3d48a}
+.mst.falta{background:#fde4e1;color:#9b2c1f;border-color:#f3b6ad}
+.mst.nome,.mst.dup{background:#ffe9d1;color:#9a4a00;border-color:#f5c08a}
 .card p{margin:0;color:var(--ink2);font-size:14px;flex:1;white-space:pre-line;overflow-wrap:anywhere}
 .meta{display:flex;flex-wrap:wrap;gap:6px}
 .pill{font-size:12px;font-weight:600;background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:3px 10px;color:var(--ink2)}
@@ -297,6 +314,22 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between}
     <div class="grid" id="grid"></div>
   </section>
 
+  <section id="meus" class="hide">
+    <div class="sh"><div><div class="kicker">Sem duplicar, sem versão errada</div><h2>Conferir meus mods</h2></div></div>
+    <div class="meus">
+      <p>Escolha a sua pasta <code>Documentos\My Games\FarmingSimulator2025\mods</code>. O site confere os mods RBT e os de terceiros editados: o que <b>falta</b>, o que está <b>desatualizado</b>, o que está <b>duplicado</b> ou com <b>nome trocado</b> (ex.: <code>FS25_GPS_RBT (1).zip</code>). Ele só mexe na pasta quando você clicar.</p>
+      <div class="acts">
+        <button class="btn btn-lime" id="btConferir">Escolher a pasta mods e conferir</button>
+        <button class="btn btn-dark hide" id="btAtualizar">Atualizar tudo</button>
+        <button class="btn btn-ghost hide" id="btDup">Arrumar duplicados</button>
+      </div>
+      <input type="file" id="inPasta" webkitdirectory multiple class="hide">
+      <div class="muted" id="meusMsg"></div>
+      <p class="muted hide" id="meusDica">Neste navegador o site só consegue LER a pasta. Para ele arrumar sozinho (gravar e tirar as cópias), use o Chrome ou o Edge no PC. Ou apague na mão as cópias apontadas acima.</p>
+      <div id="meusRes"></div>
+    </div>
+  </section>
+
   <section id="como">
     <div class="sh"><div><div class="kicker">Do download ao jogo</div><h2>Como instalar</h2></div></div>
     <div class="how">
@@ -427,14 +460,17 @@ if (DEMO) {
       S.pedido = {...d, quando:new Date()};
     },
     async listar(){ const r = await F.getDocs(F.collection(db, 'arquivos')); return r.docs.map(d => ({id:d.id, ...d.data()})); },
+    // R2: a portaria confere o login e a liberação e devolve um link que vale 10 minutos
+    async link(a){
+      if (!ARQ) throw new Error('endereço dos arquivos não configurado');
+      const tok = await auth.currentUser.getIdToken();
+      const r = await fetch(ARQ + '/link?key=' + encodeURIComponent(a.r2key || a.arquivoNome), {headers:{Authorization:'Bearer ' + tok}});
+      if (!r.ok) throw new Error(await r.text());
+      return (await r.json()).url;
+    },
     async baixar(a){
       if (a.tipo === 'r2') {
-        // R2: a portaria confere o login e a liberação e devolve um link que vale 10 minutos
-        if (!ARQ) throw new Error('endereço dos arquivos não configurado');
-        const tok = await auth.currentUser.getIdToken();
-        const r = await fetch(ARQ + '/link?key=' + encodeURIComponent(a.r2key || a.arquivoNome), {headers:{Authorization:'Bearer ' + tok}});
-        if (!r.ok) throw new Error(await r.text());
-        const {url} = await r.json();
+        const url = await api.link(a);
         const el = Object.assign(document.createElement('a'), {href:url, rel:'noopener'});
         document.body.appendChild(el); el.click(); el.remove();
         return;
@@ -616,6 +652,7 @@ async function refresh(){
   try { S.arquivos = await api.listar(); } catch(e){ S.arquivos = []; toast('Não carregou a lista: ' + e.message); }
   if (S.admin) { try { S.pedidos = await api.pedidos(); } catch(e){ S.pedidos = []; } }
   renderConta(); renderStatus(); renderGrid(); renderAdmin(); renderAbertura();
+  $('#meus').classList.toggle('hide', !(liberado() && modsDoSite().length));
 }
 
 /* ---------- eventos ---------- */
@@ -629,7 +666,37 @@ $('#grid').onclick = async e => {
   try { await api.baixar(a); } catch(err){ toast('Não baixou: ' + (err.code === 'permission-denied' ? 'acesso ainda não liberado' : err.message)); }
   b.disabled = false; b.textContent = txt;
 };
-document.querySelector('.atabs').onclick = e => { const b = e.target.closest('[data-at]'); if (!b) return;
+// Conferir meus mods
+const meusMsg = t => { $('#meusMsg').textContent = t || ''; };
+$('#btConferir').onclick = async () => {
+  try {
+    if (window.showDirectoryPicker) {
+      MEUS.dir = await window.showDirectoryPicker({ id:'mods-fs25', mode:'readwrite', startIn:'documents' });
+      if (!/mods/i.test(MEUS.dir.name)) toast('Confira: a pasta escolhida se chama "' + MEUS.dir.name + '" (o certo é a pasta mods).');
+      meusMsg('Conferindo…'); await conferir(); meusMsg('Pasta: ' + MEUS.dir.name + ' · ' + MEUS.arquivos.length + ' arquivos .zip');
+    } else { $('#inPasta').click(); }
+  } catch (e) { if (e.name !== 'AbortError') toast('Não conferiu: ' + e.message); meusMsg(''); }
+};
+$('#inPasta').onchange = async e => {
+  // navegador sem gravação (Firefox...): só lê. Pega só os .zip da própria pasta (sem subpastas).
+  MEUS.dir = null;
+  MEUS.arquivos = [...e.target.files].filter(f => /\.zip$/i.test(f.name) && (f.webkitRelativePath || '').split('/').length <= 2).map(f => ({ nome:f.name, file:f }));
+  meusMsg('Conferindo…'); await conferir(); meusMsg(MEUS.arquivos.length + ' arquivos .zip lidos (só leitura neste navegador)');
+};
+$('#btAtualizar').onclick = async () => {
+  const b = $('#btAtualizar'); b.disabled = true;
+  try { await atualizarTudo(meusMsg); if (MEUS.dir) { await conferir(); meusMsg('Pronto: mods atualizados na pasta.'); toast('Mods atualizados!'); } else meusMsg('Baixados: copie para a pasta mods.'); }
+  catch (e) { toast('Parou: ' + e.message); meusMsg(''); }
+  b.disabled = false;
+};
+$('#btDup').onclick = async () => {
+  if (MEUS.linhas.some(l => l.estado === 'nome')) return toast('Primeiro clique em "Atualizar tudo" (grava os mods com o nome certo).');
+  const lista = MEUS.linhas.flatMap(l => l.sobra.map(f => f.nome));
+  if (!confirm('Tirar estas cópias do jogo?\n\n' + lista.join('\n') + '\n\nElas viram ".zip.duplicado" (o jogo ignora). Para desfazer, é só apagar o ".duplicado" do nome.')) return;
+  try { const n = await arrumarDuplicados(); await conferir(); toast(n + ' cópia(s) tirada(s) do jogo.'); }
+  catch (e) { toast('Não arrumou: ' + e.message); }
+};
+document.querySelector('.atabs').onclick =e => { const b = e.target.closest('[data-at]'); if (!b) return;
   document.querySelectorAll('.atabs .chip').forEach(c => c.setAttribute('aria-pressed', c === b));
   $('#atPedidos').classList.toggle('hide', b.dataset.at !== 'pedidos'); $('#atArquivos').classList.toggle('hide', b.dataset.at !== 'arquivos'); };
 $('#atPedidos').onclick = async e => {
@@ -656,20 +723,26 @@ $('#listaAdm').onclick = async e => {
     if (!confirm(`Apagar "${a.nome}" do site? Não dá para desfazer.`)) return;
     try { await api.apagar(a.id); toast('Apagado.'); await refresh(); } catch(err){ toast('Erro: ' + err.message); } }
 };
-// lê <version> do modDesc.xml de dentro do .zip escolhido e preenche o campo Versão sozinho
+// lê <version> do modDesc.xml de dentro do .zip. Lê só pedaços do arquivo (o fim do zip e o modDesc),
+// então serve também para conferir a pasta mods inteira do jogador sem carregar GB na memória.
 async function versaoDoZip(file){
-  const buf = new Uint8Array(await file.arrayBuffer()), dv = new DataView(buf.buffer);
+  const pedaco = async (a, b) => new Uint8Array(await file.slice(a, b).arrayBuffer());
+  const fimLen = Math.min(file.size, 65557 + 22);
+  const fim = await pedaco(file.size - fimLen, file.size), dvf = new DataView(fim.buffer);
   let eocd = -1;
-  for (let i = buf.length - 22; i >= Math.max(0, buf.length - 65557); i--) if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  for (let i = fim.length - 22; i >= 0; i--) if (dvf.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
   if (eocd < 0) return '';
-  let p = dv.getUint32(eocd + 16, true); const n = dv.getUint16(eocd + 10, true);
-  for (let k = 0; k < n && dv.getUint32(p, true) === 0x02014b50; k++) {
+  const cdTam = dvf.getUint32(eocd + 12, true), cdIni = dvf.getUint32(eocd + 16, true), n = dvf.getUint16(eocd + 10, true);
+  const cd = await pedaco(cdIni, cdIni + cdTam), dv = new DataView(cd.buffer);
+  let p = 0;
+  for (let k = 0; k < n && p + 46 <= cd.length && dv.getUint32(p, true) === 0x02014b50; k++) {
     const metodo = dv.getUint16(p + 10, true), tam = dv.getUint32(p + 20, true);
     const ln = dv.getUint16(p + 28, true), lx = dv.getUint16(p + 30, true), lc = dv.getUint16(p + 32, true), loc = dv.getUint32(p + 42, true);
-    const nome = new TextDecoder().decode(buf.subarray(p + 46, p + 46 + ln));
+    const nome = new TextDecoder().decode(cd.subarray(p + 46, p + 46 + ln));
     if (nome.toLowerCase() === 'moddesc.xml') {
-      const ini = loc + 30 + dv.getUint16(loc + 26, true) + dv.getUint16(loc + 28, true);
-      let dados = buf.subarray(ini, ini + tam);
+      const lh = await pedaco(loc, loc + 30), dl = new DataView(lh.buffer);
+      const ini = loc + 30 + dl.getUint16(26, true) + dl.getUint16(28, true);
+      let dados = await pedaco(ini, ini + tam);
       if (metodo === 8) dados = new Uint8Array(await new Response(new Blob([dados]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer());
       else if (metodo !== 0) return '';
       const m = new TextDecoder().decode(dados).match(/<version>\s*([^<]+?)\s*<\/version>/i);
@@ -679,6 +752,90 @@ async function versaoDoZip(file){
   }
   return '';
 }
+
+/* ---------- CONFERIR MEUS MODS: compara a pasta mods do jogador com os mods do site ---------- */
+// "FS25_GPS_RBT (1).zip", "FS25_GPS_RBT - Cópia.zip" -> "FS25_GPS_RBT.zip" (cópias que o navegador/Windows criam)
+const nomeBase = n => n.replace(/\s*\(\d+\)(?=\.zip$)/i, '').replace(/\s*-\s*(c[oó]pia|copy)(\s*\(\d+\))?(?=\.zip$)/i, '').replace(/\s*\(\d+\)(?=\.zip$)/i, '');
+const modsDoSite = () => S.arquivos.filter(a => a.tipo === 'r2' && /\.zip$/i.test(a.arquivoNome || '') && ['Mods', 'Mods de terceiros'].includes(a.categoria));
+const MEUS = { dir:null, arquivos:[], linhas:[] };
+
+// arquivos = [{ nome, file }]. Devolve uma linha por mod do site.
+async function analisarMods(site, arquivos){
+  const linhas = [];
+  for (const a of site) {
+    const alvo = a.arquivoNome.toLowerCase();
+    const grupo = arquivos.filter(f => nomeBase(f.nome).toLowerCase() === alvo);
+    const certo = grupo.find(f => f.nome.toLowerCase() === alvo);
+    const sobra = grupo.filter(f => f !== certo);
+    const l = { a, certo, sobra, sua:'', estado:'' };
+    if (!grupo.length) l.estado = 'falta';
+    else if (!certo) { l.estado = 'nome'; try { l.sua = await versaoDoZip(sobra[0].file); } catch {} }
+    else {
+      try { l.sua = await versaoDoZip(certo.file); } catch {}
+      l.estado = (a.versao && l.sua && l.sua !== a.versao) ? 'velho' : 'ok';
+    }
+    linhas.push(l);
+  }
+  return linhas;
+}
+
+function renderMeus(){
+  const L = MEUS.linhas, sel = $('#meusRes');
+  if (!L.length) { sel.innerHTML = ''; return; }
+  const ESTADO = { ok:['ok', 'Em dia'], velho:['velho', 'Desatualizado'], falta:['falta', 'Falta'], nome:['nome', 'Nome errado'] };
+  const nDup = L.reduce((s, l) => s + l.sobra.length, 0);
+  const nBaixar = L.filter(l => l.estado !== 'ok').length;
+  const pode = !!MEUS.dir;
+  sel.innerHTML = `<div class="mres">${['ok', 'velho', 'falta', 'nome'].map(k => `<span class="mst ${k}">${L.filter(l => l.estado === k).length} ${ESTADO[k][1].toLowerCase()}</span>`).join('')}
+      ${nDup ? `<span class="mst dup">${nDup} duplicado${nDup > 1 ? 's' : ''}</span>` : ''}</div>
+    <div class="mlista">${L.map(l => `<div class="mrow">
+      <div class="who"><b>${esc(l.a.nome)}</b><span>${esc(l.a.arquivoNome)} · site ${esc(l.a.versao || '-')}${l.sua ? ' · sua ' + esc(l.sua) : ''}</span>
+        ${l.estado === 'nome' ? `<span class="aviso">Está com nome trocado (${esc(l.sobra[0].nome)}): o servidor não reconhece.</span>` : ''}
+        ${l.estado !== 'nome' && l.sobra.length ? `<span class="aviso">Cópia sobrando: ${l.sobra.map(f => esc(f.nome)).join(', ')}</span>` : ''}</div>
+      <span class="mst ${ESTADO[l.estado][0]}">${ESTADO[l.estado][1]}</span></div>`).join('')}</div>`;
+  $('#btAtualizar').classList.toggle('hide', !nBaixar);
+  $('#btAtualizar').textContent = pode ? `Atualizar tudo (${nBaixar})` : `Baixar os ${nBaixar} que precisa`;
+  $('#btDup').classList.toggle('hide', !(nDup || L.some(l => l.estado === 'nome')) || !pode);
+  $('#meusDica').classList.toggle('hide', pode || !(nDup || L.some(l => l.estado === 'nome')));
+}
+
+async function lerPasta(dir){
+  const arq = [];
+  for await (const [nome, h] of dir.entries()) if (h.kind === 'file' && /\.zip$/i.test(nome)) arq.push({ nome, file: await h.getFile() });
+  return arq;
+}
+async function conferir(){
+  MEUS.arquivos = MEUS.dir ? await lerPasta(MEUS.dir) : MEUS.arquivos;
+  MEUS.linhas = await analisarMods(modsDoSite(), MEUS.arquivos);
+  renderMeus();
+}
+async function gravar(dir, nome, blob){
+  const h = await dir.getFileHandle(nome, { create:true });
+  const w = await h.createWritable(); await w.write(blob); await w.close();
+}
+// baixa e grava com o NOME CERTO os que faltam, estão velhos ou com nome trocado
+async function atualizarTudo(prog){
+  const lista = MEUS.linhas.filter(l => l.estado !== 'ok');
+  let i = 0;
+  for (const l of lista) {
+    prog(`Baixando ${++i} de ${lista.length}: ${l.a.nome}…`);
+    if (!MEUS.dir) { await api.baixar(l.a); continue; }
+    const url = await api.link(l.a);
+    const r = await fetch(url); if (!r.ok) throw new Error(l.a.nome + ': ' + await r.text());
+    await gravar(MEUS.dir, l.a.arquivoNome, await r.blob());
+  }
+}
+// cópias sobrando: renomeia para .zip.duplicado (o jogo ignora; dá para desfazer tirando o ".duplicado")
+async function arrumarDuplicados(){
+  let n = 0;
+  for (const l of MEUS.linhas) for (const f of l.sobra) {
+    if (l.estado === 'nome' && !l.certo) continue; // primeiro "Atualizar tudo" grava o certo; depois a cópia vira sobra
+    await gravar(MEUS.dir, f.nome + '.duplicado', f.file);
+    await MEUS.dir.removeEntry(f.nome); n++;
+  }
+  return n;
+}
+window.RBTMeus = { nomeBase, analisarMods, versaoDoZip, gravar, MEUS, conferir, arrumarDuplicados, renderMeus }; // usado nos testes
 fA.arquivo.onchange = async () => {
   const f = fA.arquivo.files[0];
   if (!f || !/\.zip$/i.test(f.name)) return;
