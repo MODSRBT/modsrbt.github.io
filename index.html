@@ -263,7 +263,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between}
             <button type="button" class="chip" data-modo="arquivo" aria-pressed="true">Enviar arquivo</button>
             <button type="button" class="chip" data-modo="link" aria-pressed="false">Link externo (Drive, etc.)</button>
           </div>
-          <label class="full" id="lbArq">Arquivo (.zip, .apk… até 20 MB)<input name="arquivo" type="file"></label>
+          <label class="full" id="lbArq">Arquivo (.zip, .apk… até 100 MB)<input name="arquivo" type="file"></label>
           <label class="full hide" id="lbLink">Link (só quem está liberado vê)<input name="link" type="url" placeholder="https://drive.google.com/..."></label>
           <div class="full prog hide" id="prog"><i></i></div>
           <div class="full" style="display:flex;gap:8px;flex-wrap:wrap">
@@ -335,7 +335,8 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between}
 const FB_VER = '10.12.2';
 const CFG = window.RBT_FIREBASE || {};
 const DEMO = !CFG.apiKey;
-const LIMITE = 20 * 1024 * 1024;      // 20 MB por arquivo
+const ARQ = (window.RBT_ARQUIVOS || '').replace(/\/$/, '');   // portaria dos arquivos no Cloudflare R2
+const LIMITE = (ARQ ? 100 : 20) * 1024 * 1024;  // R2: 100 MB por envio pelo site (Worker grátis); sem R2: 20 MB
 const PEDACO = 700000;                 // caracteres base64 por documento (Firestore aceita até ~1 MB)
 
 const $ = s => document.querySelector(s);
@@ -423,6 +424,17 @@ if (DEMO) {
     },
     async listar(){ const r = await F.getDocs(F.collection(db, 'arquivos')); return r.docs.map(d => ({id:d.id, ...d.data()})); },
     async baixar(a){
+      if (a.tipo === 'r2') {
+        // R2: a portaria confere o login e a liberação e devolve um link que vale 10 minutos
+        if (!ARQ) throw new Error('endereço dos arquivos não configurado');
+        const tok = await auth.currentUser.getIdToken();
+        const r = await fetch(ARQ + '/link?key=' + encodeURIComponent(a.r2key || a.arquivoNome), {headers:{Authorization:'Bearer ' + tok}});
+        if (!r.ok) throw new Error(await r.text());
+        const {url} = await r.json();
+        const el = Object.assign(document.createElement('a'), {href:url, rel:'noopener'});
+        document.body.appendChild(el); el.click(); el.remove();
+        return;
+      }
       const r = await F.getDocs(F.collection(db, 'arquivos', a.id, 'partes'));
       const docs = r.docs.sort((x, y) => x.id < y.id ? -1 : 1).map(d => d.data());
       if (docs[0]?.url) { window.open(docs[0].url, '_blank', 'noopener'); return; }
@@ -445,7 +457,20 @@ if (DEMO) {
       if (file || link) {
         const velhas = await F.getDocs(F.collection(db, 'arquivos', id, 'partes'));
         let novas = [];
-        if (file) {
+        if (file && ARQ) {
+          // R2: manda o arquivo para a portaria (só admin), com barra de progresso
+          const tok = await auth.currentUser.getIdToken();
+          await new Promise((ok, err) => {
+            const x = new XMLHttpRequest();
+            x.open('PUT', ARQ + '/up/' + encodeURIComponent(file.name));
+            x.setRequestHeader('Authorization', 'Bearer ' + tok);
+            x.upload.onprogress = e => e.lengthComputable && prog(0.95 * e.loaded / e.total);
+            x.onload = () => x.status === 200 ? ok() : err(new Error(x.responseText || ('erro ' + x.status)));
+            x.onerror = () => err(new Error('sem conexão com a portaria dos arquivos'));
+            x.send(file);
+          });
+          Object.assign(m, {tipo:'r2', r2key:file.name, tamanho:file.size, arquivoNome:file.name});
+        } else if (file) {
           const b64 = await lerBase64(file);
           for (let i = 0; i < b64.length; i += PEDACO) novas.push({dados:b64.slice(i, i + PEDACO)});
           Object.assign(m, {tipo:'arquivo', tamanho:file.size, arquivoNome:file.name});
@@ -457,6 +482,11 @@ if (DEMO) {
       prog(1);
     },
     async apagar(id){
+      const d0 = (await F.getDoc(F.doc(db, 'arquivos', id))).data() || {};
+      if (d0.tipo === 'r2' && ARQ && d0.r2key && !S.arquivos.some(a => a.id !== id && a.r2key === d0.r2key)) {
+        const tok = await auth.currentUser.getIdToken();
+        await fetch(ARQ + '/up/' + encodeURIComponent(d0.r2key), {method:'DELETE', headers:{Authorization:'Bearer ' + tok}});
+      }
       const r = await F.getDocs(F.collection(db, 'arquivos', id, 'partes'));
       for (const d of r.docs) await F.deleteDoc(d.ref);
       await F.deleteDoc(F.doc(db, 'arquivos', id));
@@ -653,7 +683,7 @@ fA.onsubmit = async e => {
   e.preventDefault();
   const file = S.modo === 'arquivo' ? fA.arquivo.files[0] : null;
   const link = S.modo === 'link' ? fA.link.value.trim() : '';
-  if (file && file.size > LIMITE) return toast('Arquivo maior que 20 MB: use "Link externo".');
+  if (file && file.size > LIMITE) return toast(`Arquivo maior que ${LIMITE / 1048576} MB: use "Link externo".`);
   if (!fA.arqId.value && !file && !link) return toast('Escolha o arquivo (ou o link).');
   const meta = {id:fA.arqId.value, nome:fA.nome.value.trim(), versao:fA.versao.value.trim(), categoria:fA.categoria.value, ordem:fA.ordem.value, descricao:fA.descricao.value.trim()};
   const bt = $('#btSalvar'), pg = $('#prog'); bt.disabled = true; pg.classList.remove('hide');
