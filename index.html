@@ -90,6 +90,19 @@ nav.links a:hover{color:var(--ink);background:var(--card)}
 .ticker span:after{content:"";width:8px;height:8px;background:var(--lime);transform:rotate(45deg)}
 .ticker span em{font-style:normal;color:var(--lime);font-weight:700;margin-left:-10px}
 @keyframes rola{to{transform:translateX(-50%)}}
+/* abertura com a arte (banner.webp, 1859x846) */
+.hero.hero-img{min-height:0;display:block;background:#0c0f09}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.hbox{position:relative}
+.hbox img{display:block;width:100%;height:auto}
+.hb{position:absolute;top:77.6%;height:10.8%;border-radius:999px;transition:box-shadow .15s,background .15s}
+.hb1{left:32.0%;width:17.4%}
+.hb2{left:50.5%;width:17.8%}
+.hb:hover,.hb:focus-visible{background:rgba(255,255,255,.08);box-shadow:0 0 0 3px rgba(184,224,90,.75),0 0 24px rgba(184,224,90,.55);outline:none}
+.hfoot{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:center;padding:12px 16px;background:#0c0f09}
+.hfoot .num{margin:0}
+.hero .hacts,#campo{display:none}
+@media (max-width:700px){.hb{display:none}.hero .hacts{display:flex;gap:8px;justify-content:center;width:100%}}
 @media (prefers-reduced-motion:reduce){.hero .campo .rua,.ticker .trk,.hero .kicker:before{animation:none}}
 @media (max-width:820px){.hero{min-height:440px}.hero .txt{padding:34px 16px 24px}.marca .m{-webkit-text-stroke-width:1.5px}.hero .kicker{font-size:10.5px;letter-spacing:.1em;white-space:nowrap}.hero p{font-size:15.5px}}
 
@@ -244,18 +257,19 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between}
 </header>
 
 <main class="wrap">
-  <div class="hero">
-    <svg class="campo" id="campo" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg>
-    <div class="txt">
-      <div class="kicker">Farming Simulator 25 · Servidor RBT</div>
-      <h1 class="marca"><span class="m">Mods</span><span class="r">RBT</span></h1>
-      <p>Os mods do nosso servidor num lugar só, sempre na versão mais nova. Entre com o Google, peça seu acesso e baixe.</p>
-      <div class="acts">
-        <a class="btn btn-lime" href="#arquivos">Ver arquivos</a>
-        <a class="btn btn-ghost" href="#como">Como instalar</a>
-      </div>
+  <!-- 25/11: abertura com a arte do banner (os botões desenhados na arte ganham áreas clicáveis por cima) -->
+  <div class="hero hero-img">
+    <h1 class="sr">Mods RBT · Roleplay FS25</h1>
+    <div class="hbox">
+      <img src="banner.webp" width="1859" height="846" alt="Mods RBT · Roleplay FS25 — os mods do nosso servidor em um só lugar. Peça seu acesso e baixe para jogar.">
+      <a class="hb hb1" href="#arquivos" aria-label="Ver arquivos"></a>
+      <a class="hb hb2" href="#como" aria-label="Como instalar"></a>
+    </div>
+    <div class="hfoot">
+      <div class="acts hacts"><a class="btn btn-lime" href="#arquivos">Ver arquivos</a><a class="btn btn-ghost" href="#como">Como instalar</a></div>
       <div class="num" id="hNum"></div>
     </div>
+    <svg id="campo" hidden aria-hidden="true"></svg>
     <div class="ticker" aria-hidden="true"><div class="trk" id="tick"></div></div>
   </div>
 
