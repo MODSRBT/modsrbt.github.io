@@ -194,6 +194,10 @@ details p{margin:0 0 16px;color:var(--ink2)}
 .st.pendente{background:var(--warn-bg);color:var(--warn)}
 .st.aprovado{background:var(--ok-bg);color:var(--ok)}
 .st.negado{background:var(--bad-bg);color:var(--bad)}
+.acc{flex:1 1 100%;display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;font-size:13px;color:var(--ink2)}
+.acc b{color:var(--ink);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+.acc label{display:inline-flex;gap:5px;align-items:center;cursor:pointer;color:var(--ink)}
+.acc input{width:16px;height:16px;accent-color:var(--olive2)}
 .form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .form label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600;color:var(--ink2);min-width:0}
 .form>*{min-width:0}
@@ -418,7 +422,8 @@ if (DEMO) {
     async listar(){ return ex.slice(); },
     async baixar(a){ toast('Demonstração: aqui baixaria ' + (a.arquivoNome || a.nome)); },
     async pedidos(){ return peds; },
-    async setStatus(id, st){ const p = peds.find(x => x.id === id); if (p) p.status = st; },
+    async setStatus(id, st, acesso){ const p = peds.find(x => x.id === id); if (p) { p.status = st; if (acesso) p.acesso = acesso; } },
+    async setAcesso(id, acesso){ const p = peds.find(x => x.id === id); if (p) p.acesso = acesso; },
     async apagarPedido(id){ peds.splice(peds.findIndex(x => x.id === id), 1); },
     async salvar(meta, file, link, prog){ for (let i = 1; i <= 5; i++){ prog(i/5); await new Promise(r => setTimeout(r, 150)); }
       const i = ex.findIndex(x => x.id === meta.id); const o = {...meta, id: meta.id || ('x' + Date.now()), tipo: file ? 'arquivo' : (link ? 'link' : (ex[i]?.tipo || 'arquivo')), tamanho: file ? file.size : ex[i]?.tamanho, arquivoNome: file ? file.name : ex[i]?.arquivoNome, atualizado:new Date()};
@@ -487,7 +492,8 @@ if (DEMO) {
       setTimeout(() => URL.revokeObjectURL(u), 60000);
     },
     async pedidos(){ const r = await F.getDocs(F.collection(db, 'pedidos')); return r.docs.map(d => ({id:d.id, ...d.data()})); },
-    async setStatus(id, st){ await F.updateDoc(F.doc(db, 'pedidos', id), {status:st, decidido:F.serverTimestamp()}); },
+    async setStatus(id, st, acesso){ const d = {status:st, decidido:F.serverTimestamp()}; if (acesso) d.acesso = acesso; await F.updateDoc(F.doc(db, 'pedidos', id), d); },
+    async setAcesso(id, acesso){ await F.updateDoc(F.doc(db, 'pedidos', id), {acesso}); },
     async apagarPedido(id){ await F.deleteDoc(F.doc(db, 'pedidos', id)); },
     async salvar(meta, file, link, prog){
       const id = meta.id || meta.nome.normalize('NFD').replace(/[^\w]+/g, '_').replace(/^_|_$/g, '').toLowerCase().slice(0, 40) + '_' + Date.now().toString(36);
@@ -536,6 +542,9 @@ if (DEMO) {
 
 /* ---------- telas ---------- */
 const liberado = () => S.admin || S.pedido?.status === 'aprovado';
+// pastas (categorias) que o admin escolhe ao liberar. Sem a lista "acesso" no pedido = todas (quem já estava liberado).
+const PASTAS = [['Mods', 'Mods RBT'], ['Mods de terceiros', 'Mods de terceiros'], ['Aplicativos', 'Aplicativos'], ['Ferramentas', 'Ferramentas']];
+const podePasta = cat => S.admin || (S.pedido?.status === 'aprovado' && (!Array.isArray(S.pedido.acesso) || S.pedido.acesso.includes(cat)));
 
 function renderConta(){
   const el = $('#account');
@@ -589,7 +598,8 @@ function renderGrid(){
   $('#cnt').textContent = S.arquivos.length + (S.arquivos.length === 1 ? ' arquivo' : ' arquivos');
   if (!lista.length) { $('#grid').innerHTML = `<div class="empty">${S.arquivos.length ? 'Nada encontrado com esse filtro.' : 'Nenhum arquivo publicado ainda.'}</div>`; return; }
   $('#grid').innerHTML = lista.map(a => {
-    const bt = liberado() ? `<button class="btn btn-lime" data-baixar="${esc(a.id)}">${a.tipo === 'link' ? 'Abrir link' : 'Baixar'}</button>`
+    const bt = liberado() && !podePasta(a.categoria) ? `<button class="btn btn-ghost" disabled title="Peça ao administrador">Sem acesso a esta pasta</button>`
+      : liberado() ? `<button class="btn btn-lime" data-baixar="${esc(a.id)}">${a.tipo === 'link' ? 'Abrir link' : 'Baixar'}</button>`
       : !S.user ? `<button class="btn btn-ghost" data-entrar>Entrar para baixar</button>`
       : `<button class="btn btn-ghost" disabled>${S.pedido?.status === 'pendente' ? 'Aguardando liberação' : 'Peça acesso acima'}</button>`;
     return `<article class="card">
@@ -609,12 +619,13 @@ function renderAdmin(){
   const ps = S.pedidos.slice().sort((a, b) => (ord[a.status] ?? 3) - (ord[b.status] ?? 3) || (toDate(b.quando) || 0) - (toDate(a.quando) || 0));
   const pend = ps.filter(p => p.status === 'pendente').length;
   $('#cntPend').textContent = pend ? `(${pend})` : '';
-  $('#atPedidos').innerHTML = ps.length ? ps.map(p => `<div class="row">
+  $('#atPedidos').innerHTML = ps.length ? ps.map(p => `<div class="row" data-row="${esc(p.id)}">
       <div class="who"><b>${esc(p.nome)}</b><span>${esc(p.email)} · ${dataBR(p.quando)}</span></div>
       <span class="st ${esc(p.status)}">${esc(p.status)}</span>
-      ${p.status !== 'aprovado' ? `<button class="btn btn-dark btn-sm" data-ped="${esc(p.id)}" data-st="aprovado">Aprovar</button>` : ''}
+      ${p.status !== 'aprovado' ? `<button class="btn btn-dark btn-sm" data-ped="${esc(p.id)}" data-st="aprovado">Aprovar</button>` : `<button class="btn btn-dark btn-sm" data-acc="${esc(p.id)}">Salvar acesso</button>`}
       ${p.status !== 'negado' ? `<button class="btn btn-ghost btn-sm" data-ped="${esc(p.id)}" data-st="negado">${p.status === 'aprovado' ? 'Tirar acesso' : 'Negar'}</button>` : ''}
       <button class="btn btn-bad btn-sm" data-delped="${esc(p.id)}" title="Apagar o pedido (a pessoa pode pedir de novo)">Apagar</button>
+      <div class="acc"><b>Pastas</b>${PASTAS.map(([c, r]) => `<label><input type="checkbox" value="${esc(c)}" ${!Array.isArray(p.acesso) || p.acesso.includes(c) ? 'checked' : ''}>${esc(r)}</label>`).join('')}</div>
     </div>`).join('') : '<div class="empty">Nenhum pedido ainda.</div>';
   const as = S.arquivos.slice().sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
   $('#listaAdm').innerHTML = '<h3 style="font-size:17px;margin-bottom:6px">Publicados</h3>' + (as.length ? as.map(a => `<div class="row">
@@ -700,9 +711,17 @@ document.querySelector('.atabs').onclick =e => { const b = e.target.closest('[da
   document.querySelectorAll('.atabs .chip').forEach(c => c.setAttribute('aria-pressed', c === b));
   $('#atPedidos').classList.toggle('hide', b.dataset.at !== 'pedidos'); $('#atArquivos').classList.toggle('hide', b.dataset.at !== 'arquivos'); };
 $('#atPedidos').onclick = async e => {
-  const b = e.target.closest('[data-ped]'), d = e.target.closest('[data-delped]');
+  const b = e.target.closest('[data-ped]'), d = e.target.closest('[data-delped]'), ac = e.target.closest('[data-acc]');
+  // pastas marcadas na linha do pedido
+  const pastasDe = el => [...el.closest('.row').querySelectorAll('.acc input:checked')].map(i => i.value);
   try {
-    if (b) { await api.setStatus(b.dataset.ped, b.dataset.st); toast(b.dataset.st === 'aprovado' ? 'Liberado!' : 'Feito.'); }
+    if (b && b.dataset.st === 'aprovado') {
+      const acc = pastasDe(b); if (!acc.length) return toast('Marque pelo menos uma pasta.');
+      await api.setStatus(b.dataset.ped, 'aprovado', acc); toast('Liberado: ' + acc.map(c => PASTAS.find(p => p[0] === c)[1]).join(', '));
+    }
+    else if (b) { await api.setStatus(b.dataset.ped, b.dataset.st); toast('Feito.'); }
+    else if (ac) { const acc = pastasDe(ac); if (!acc.length) return toast('Marque pelo menos uma pasta (ou use "Tirar acesso").');
+      await api.setAcesso(ac.dataset.acc, acc); toast('Acesso salvo.'); }
     else if (d) { if (!confirm('Apagar este pedido? A pessoa poderá pedir de novo.')) return; await api.apagarPedido(d.dataset.delped); }
     else return;
     S.pedidos = await api.pedidos(); renderAdmin();
@@ -756,7 +775,7 @@ async function versaoDoZip(file){
 /* ---------- CONFERIR MEUS MODS: compara a pasta mods do jogador com os mods do site ---------- */
 // "FS25_GPS_RBT (1).zip", "FS25_GPS_RBT - Cópia.zip" -> "FS25_GPS_RBT.zip" (cópias que o navegador/Windows criam)
 const nomeBase = n => n.replace(/\s*\(\d+\)(?=\.zip$)/i, '').replace(/\s*-\s*(c[oó]pia|copy)(\s*\(\d+\))?(?=\.zip$)/i, '').replace(/\s*\(\d+\)(?=\.zip$)/i, '');
-const modsDoSite = () => S.arquivos.filter(a => a.tipo === 'r2' && /\.zip$/i.test(a.arquivoNome || '') && ['Mods', 'Mods de terceiros'].includes(a.categoria));
+const modsDoSite = () => S.arquivos.filter(a => a.tipo === 'r2' && /\.zip$/i.test(a.arquivoNome || '') && ['Mods', 'Mods de terceiros'].includes(a.categoria) && podePasta(a.categoria));
 const MEUS = { dir:null, arquivos:[], linhas:[] };
 
 // arquivos = [{ nome, file }]. Devolve uma linha por mod do site.
