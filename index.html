@@ -617,7 +617,7 @@ function renderGrid(){
       : `<button class="btn btn-ghost" disabled>${S.pedido?.status === 'pendente' ? 'Aguardando liberação' : 'Peça acesso acima'}</button>`;
     return `<article class="card">
       <div class="hd">${icone(a)}<div style="min-width:0"><h3>${esc(a.nome)}</h3><div class="tag">${esc(a.categoria === 'Mods' ? 'Mods RBT' : (a.categoria || ''))}</div></div></div>
-      ${a.autor ? `<div class="orig">Original: <b>${esc(a.autor)}</b> · editado pelo RBT</div>` : ''}
+      ${a.autor ? `<div class="orig">Original: <b>${esc(a.autor)}</b>${(a.editado === true || /_RBT\b/i.test(a.arquivoNome || '')) ? ' · editado pelo RBT' : ''}</div>` : ''}
       <p>${esc(a.descricao || '')}</p>
       <div class="meta">${a.versao ? `<span class="pill">Versão ${esc(a.versao)}</span>` : ''}${a.tamanho ? `<span class="pill">${kb(a.tamanho)}</span>` : ''}${a.atualizado ? `<span class="pill ${recente(a.atualizado) ? 'new' : ''}">${recente(a.atualizado) ? 'Novo · ' : ''}Atualizado ${dataHoraBR(a.atualizado)}</span>` : ''}</div>
       ${bt}</article>`;
